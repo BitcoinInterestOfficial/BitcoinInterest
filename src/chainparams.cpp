@@ -96,7 +96,7 @@ public:
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.BIP65Height = 388381; // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
         consensus.BIP66Height = 363725; // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
-        consensus.BCIHeight = 491407; // Around 10/25/2017 12:00 UTC
+        consensus.BCIHeight = 505083; // Around 1/22/2018 11:59 GMT
         consensus.BCIPremineWindow = 8000;
         consensus.BCIPremineEnforceWhitelist = true;
         consensus.BitcoinPostforkBlock = uint256S("000000000000000000e5438564434edaf41e63829a637521a96235adf4653e1b");
