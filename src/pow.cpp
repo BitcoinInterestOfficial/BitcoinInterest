@@ -24,7 +24,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (postfork == false) {
         return BitcoinGetNextWorkRequired(pindexLast, pblock, params);
     }
-    else if (nHeight < params.BCIHeight + params.BCIPremineWindow) {
+    else if (nHeight < params.BCIHeight + params.BCIPremineWindow+10) {
         return nProofOfWorkLimit;
     }
     else if (nHeight < params.BCIHeight + params.BCIPremineWindow + params.nPowAveragingWindow){

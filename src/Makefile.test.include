@@ -85,8 +85,8 @@ BITCOIN_TESTS =\
   test/univalue_tests.cpp \
   test/util_tests.cpp \
   test/equihash_tests.cpp \
-  test/BCI_cltv_multisig_data.h \
-  test/BCI_tests.cpp
+  test/bci_cltv_multisig_data.h \
+  test/bci_tests.cpp
 
 if ENABLE_WALLET
 BITCOIN_TESTS += \

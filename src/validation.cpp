@@ -92,6 +92,8 @@ static void CheckBlockIndex(const Consensus::Params& consensusParams);
 
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
+CScript CHARITY_SCRIPT;
+CScript PREMINED_SCRIPT;
 
 const std::string strMessageMagic = "Bitcoin Interest Signed Message:\n";
 
@@ -1050,6 +1052,21 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
     CAmount nSubsidy = 50 * COIN;
     // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= halvings;
+	
+	if(nHeight >= consensusParams.BCIHeight)
+	{
+		CAmount nPostForkSubsidy = 54 * COIN;
+		if(nHeight <= (consensusParams.BCIHeight + consensusParams.BCIPremineWindow))
+		{
+			nSubsidy = 162.5* COIN;
+		}
+		else
+		{
+			nSubsidy = nPostForkSubsidy;
+			nSubsidy >>= halvings;
+		}
+	}
+			
     return nSubsidy;
 }
 
@@ -1844,6 +1861,16 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                                block.vtx[0]->GetValueOut(), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
 
+	if (pindex->nHeight > ((int32_t)chainparams.GetConsensus().BCIHeight + (int32_t)chainparams.GetConsensus().BCIPremineWindow ))
+	{
+	    // For Bitcoin Interest also add the protocol rule that the first output in the coinbase must go to the charity address and have at least 8% of the subsidy (as per integer arithmetic)
+		if (block.vtx[0]->vout[0].scriptPubKey != CreateCharityScriptPubKey())
+			return state.DoS(100, error("ConnectBlock() : coinbase does not pay to the charity in the first output)"));
+		int64_t charityAmount = GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus()) * 8 / 100;
+		if (block.vtx[0]->vout[0].nValue < charityAmount)
+		   return state.DoS(100, error("ConnectBlock() : coinbase does not pay enough to the charity"));			
+	}		
+							   							   							   							   
     if (!control.Wait())
         return state.DoS(100, error("%s: CheckQueue failed", __func__), REJECT_INVALID, "block-validation-failed");
     int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
@@ -3021,16 +3048,10 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
     if (nHeight >= consensusParams.BCIHeight &&
         nHeight < consensusParams.BCIHeight + consensusParams.BCIPremineWindow)
     {
-        if (block.vtx[0]->vout.size() != 1) {
-            return state.DoS(
-                100, error("%s: only one coinbase output is allowed",__func__),
-                REJECT_INVALID, "bad-premine-coinbase-output");
-        }
         const CTxOut& output = block.vtx[0]->vout[0];
-        bool valid = Params().IsPremineAddressScript(output.scriptPubKey, (uint32_t)nHeight);
-        if (!valid) {
+        if (output.scriptPubKey!= CreatePreminedScriptPubKey()) {
             return state.DoS(
-                100, error("%s: not in premine whitelist", __func__),
+                100, error("%s: not premined Key", __func__),
                 REJECT_INVALID, "bad-premine-coinbase-scriptpubkey");
         }
     }
@@ -3956,6 +3977,10 @@ bool LoadBlockIndex(const CChainParams& chainparams)
         // instead only check it prior to LoadBlockIndexDB to set
         // needs_init.
 
+		// Initialise the charity script here, as this takes place in the the test code also
+
+		CHARITY_SCRIPT << OP_DUP << OP_HASH160 << ParseHex(chainparams.GetConsensus().CharityPubKey) << OP_EQUALVERIFY << OP_CHECKSIG;
+	
         LogPrintf("Initializing databases...\n");
         // Use the provided setting for -txindex in the new database
         fTxIndex = gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX);
@@ -4469,3 +4494,13 @@ public:
         mapBlockIndex.clear();
     }
 } instance_of_cmaincleanup;
+
+
+CScript CreatePreminedScriptPubKey()
+{	const CChainParams& chainparams = Params();
+    return CScript() << OP_DUP << OP_HASH160 << ParseHex(chainparams.GetConsensus().CharityPubKey) << OP_EQUALVERIFY << OP_CHECKSIG;
+}
+CScript CreateCharityScriptPubKey()
+{	const CChainParams& chainparams = Params();
+    return CScript() << OP_DUP << OP_HASH160 << ParseHex(chainparams.GetConsensus().PreminedPubKey) << OP_EQUALVERIFY << OP_CHECKSIG;
+}

@@ -27,12 +27,13 @@ NOTE: Building with Qt4 is still supported, however, could result in a broken UI
 Build Bitcoin Core
 ------------------------
 
-1. Clone the Bitcoin Interest source code and cd into `BTCINT`
+1. Clone the Bitcoin Interest source code and cd into `bitcoin-interest`
+=======
 
-        git clone https://github.com/BTCINT/btcpgu
-        cd BTCINT
+        git clone https://github.com/bitcoin-interest/bitcoin--interest
+        cd bitcoin-interest`
 
-2.  Build BTCINT:
+2.  Build btcgpu:
 
     Configure and build the headless bitcoin binaries as well as the GUI (if Qt is found).
 
@@ -53,15 +54,16 @@ Build Bitcoin Core
 Running
 -------
 
-Bitcoin Interest is now available at `./src/binterest`
+Bitcoin Interest is now available at `./src/bcid`
+
 
 Before running, it's recommended you create an RPC configuration file.
 
-    echo -e "rpcuser=bitcoinrpc\nrpcpassword=$(xxd -l 16 -p /dev/urandom)" > "$HOME/Library/Application Support/BitcoinInterest/bitcoininterest.conf"
+    echo -e "rpcuser=bitcoinrpc\nrpcpassword=$(xxd -l 16 -p /dev/urandom)" > "$HOME/Library/Application Support/BitcoinInterest/bitcoin.conf"
 
-    chmod 600 "$HOME/Library/Application Support/BitcoinInterest/bitcoininterest.conf"
+    chmod 600 "$HOME/Library/Application Support/BitcoinInterest/bitcoin.conf"
 
-The first time you run binterest, it will start downloading the blockchain. This process could take several hours.
+The first time you run bcid, it will start downloading the blockchain. This process could take several hours.
 
 You can monitor the download process by looking at the debug.log file:
 
@@ -70,9 +72,9 @@ You can monitor the download process by looking at the debug.log file:
 Other commands:
 -------
 
-    ./src/binterest -daemon # Starts the bitcoin daemon.
-    ./src/binterest-cli --help # Outputs a list of command-line options.
-    ./src/binterest-cli help # Outputs a list of RPC commands when the daemon is running.
+    ./src/bcid -daemon # Starts the bitcoin daemon.
+    ./src/bci-cli --help # Outputs a list of command-line options.
+    ./src/bci-cli help # Outputs a list of RPC commands when the daemon is running.
 
 Using Qt Creator as IDE
 ------------------------

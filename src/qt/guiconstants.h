@@ -49,7 +49,7 @@ static const int MAX_URI_LENGTH = 255;
 #define SPINNER_FRAMES 36
 
 #define QAPP_ORG_NAME "BitcoinInterest"
-#define QAPP_ORG_DOMAIN "bitcoininterest.org"
+#define QAPP_ORG_DOMAIN "BTCIpu.org"
 #define QAPP_APP_NAME_DEFAULT "BitcoinInterest-Qt"
 #define QAPP_APP_NAME_TESTNET "BitcoinInterest-Qt-testnet"
 

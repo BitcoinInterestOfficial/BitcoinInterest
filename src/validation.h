@@ -480,4 +480,10 @@ void DumpMempool();
 /** Load the mempool from disk. */
 bool LoadMempool();
 
+/** Create ScriptPubKey script with Premined address. **/
+CScript CreatePreminedScriptPubKey();
+
+/** Create ScriptPubKey script with Charity address. **/
+CScript CreateCharityScriptPubKey();
+
 #endif // BITCOIN_VALIDATION_H

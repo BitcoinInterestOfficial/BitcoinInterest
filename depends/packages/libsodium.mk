@@ -1,5 +1,5 @@
 # Copyright (c) 2016 The Zcash developers
-# Copyright (c) 2017 The BTCINT developers
+# Copyright (c) 2017 The BTCIPU developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 

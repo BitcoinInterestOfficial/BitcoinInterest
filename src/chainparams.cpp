@@ -96,16 +96,17 @@ public:
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.BIP65Height = 388381; // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
         consensus.BIP66Height = 363725; // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
-        consensus.BCIHeight = 505083; // Around 1/22/2018 11:59 GMT
+        consensus.BCIHeight = 505083; // Around 01/22/2018 12:00 UTC
         consensus.BCIPremineWindow = 8000;
         consensus.BCIPremineEnforceWhitelist = true;
-        consensus.BitcoinPostforkBlock = uint256S("000000000000000000e5438564434edaf41e63829a637521a96235adf4653e1b");
-        consensus.BitcoinPostforkTime = 1508808039;
+        consensus.BitcoinPostforkBlock = uint256S("00000000000000000035e9ac079854b0b30847ffb7fda0ef1a4928b13615db3b");
+        consensus.BitcoinPostforkTime = 1516413885;
         consensus.powLimit = uint256S("0007ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powLimitStart = uint256S("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powLimitLegacy = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        
-        //based on https://github.com/BitcoinInterest1/BitcoinInterest/issues/78
+		consensus.CharityPubKey = "9bdb39cb8fa89a39f8e292ac70213f0bf4817d4f"; // 1FD6MonoaHV8FhHpphrcDWE9oKXoVc2CFp
+        consensus.PreminedPubKey = "9bdb39cb8fa89a39f8e292ac70213f0bf4817d4f"; // 1FD6MonoaHV8FhHpphrcDWE9oKXoVc2CFp
+        //based on https://github.com/BTCIPU/BTCIPU/issues/78
         consensus.nPowAveragingWindow = 30;
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.nPowMaxAdjustDown = 32;
@@ -147,11 +148,11 @@ public:
         pchMessageStartLegacy[2] = 0xb4;
         pchMessageStartLegacy[3] = 0xd9;
 
-        pchMessageStart[0] = 0xe1;
-        pchMessageStart[1] = 0x47;
-        pchMessageStart[2] = 0x6d;
-        pchMessageStart[3] = 0x44;
-        nDefaultPort = 8338; // different port than Bitcoin
+        pchMessageStart[0] = 0xed;
+        pchMessageStart[1] = 0xe4;
+        pchMessageStart[2] = 0xfe;
+        pchMessageStart[3] = 0x26;
+        nDefaultPort = 8331; // different port than Bitcoin
         nBitcoinDefaultPort = 8333;
         nPruneAfterHeight = 100000;
         const size_t N = 200, K = 9;
@@ -168,12 +169,12 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
 
-        vSeeds.emplace_back("eu-dnsseed.bitcoininterest-official.org", true);
-        vSeeds.emplace_back("dnsseed.bitcoininterest.org", true);
-        vSeeds.emplace_back("dnsseed.BTCINT.org", true);
+        vSeeds.emplace_back("seeder1.bci-server.com", true);
+        vSeeds.emplace_back("seeder2.bci-server.com", true);
+        vSeeds.emplace_back("seeder3.bci-server.com", true);
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,38);  // prefix: G
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,23);  // prefix: A
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,102);  // prefix: i
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,23);   // prefix: A
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,128);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x88, 0xAD, 0xE4};
@@ -209,13 +210,6 @@ public:
                         //   (the tx=... number in the SetBestChain debug.log lines)
             3.1         // * estimated number of transactions per second after that timestamp
         };
-
-        vPreminePubkeys = {
-            { "02babc391be409351aa993deb10083a0a852b79b36df80954341c74522fb298c21", "0267c59df7a3653d9cef3819cfb5a2a35d3f6217f522c307f05ab5714c1c738c44", "02532558057b56b76349b6a3a8c9d39547e482869fcd9556767c83523aa02fb358", "0214a27d6aa62e4aa14ebaf4682cd90e629bcb4ab18eccfed150dbed0b447bbafa", "038f4a7a5524929642e5688c5cecac4b5c7806a6520316f53ba71dbbdb3e181037", "02bb4feeb207779054aacb49b61d325f46e0b98afb301a66dc32ca3e7484f419ef" },
-            { "0395a0b7b7fed3a09ad9a526f58955b2e6c6349678fc319fad79822d7b5727a189", "03b2c38ed954facb5adce1a8621ffb559601490125ba09e65d5e3e667a2adc6fdc", "03fd383f5b8ccb9aaedd2b5924f7198dacd2f6d38b50460b03194204344c5e8f2c", "02aa0a0aa08142f9bd3c2e794a292c68df730173bce2e6a69c2810e445df7ed363", "0291a043b4375bbde4e5e3738957ae5e83c8eecab70b90f55b3dc0b547a1ac19cf", "031f4d880c835238b97625d20579940e965a833c30fb8f643bd5e6a43ef37e0ee7" },
-            { "0328571bff52ab95267ca51d7fe2689599cb73300a3847d6440ecd9882166e1ed7", "0301411004164e5798db00227c1a8e87c4e0a0e3425057b1c650a5e88252b08035", "0399e7477f01d40af05a417cfbf98c179e0c92778fb731e7f6422036c4918cb0d1", "02f136e4181d63ec1d3f587513a21427c6ec5d5c36364f20abdf4f751ce21e485f", "02fd5c856002b77384599ea9cd6ceae515223809e6f1b63d45be5456b409d2be8e", "02bf748f7e7291e9061f32bc72ea52a325154dadddb98348307838565fc8855f4c" },
-            { "03d1198ed4659a53bbc5fd945893545ee5efda9c20d014b87c138f658ed61d9cd2", "03d558f9dd313bf6a4ebbc4f3c9209f758e21e99c1d3fb3a2fc40517f4de01d55c", "03e185dd9289d6f72ed579b2db9474e033361902cb5c60817f757652fd86910677", "023c4975dbb840e91a0047496412a8f69eaf61571d24a552713d585337bed26101", "032c8735d320b6219cb398999345fea9e6b234e5f7d9f96c6a2758658d261acd6d", "029860998228d746ec5ccdc47b451b3143c05f9e26b7b1a491d64429dcac3feb0e" },
-        };
     }
 };
 
@@ -231,7 +225,7 @@ public:
         consensus.BIP34Hash = uint256S("0x0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8");
         consensus.BIP65Height = 581885; // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
         consensus.BIP66Height = 330776; // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
-        consensus.BCIHeight = 1210320;
+        consensus.BCIHeight = 1258854;
         consensus.BCIPremineWindow = 50;
         consensus.BCIPremineEnforceWhitelist = false;
         consensus.BitcoinPostforkBlock = uint256S("00000000ef93c2d9bac8da61ff11a699a5b815f77a194c567c5de0dbdf0bf28b");
@@ -239,8 +233,9 @@ public:
         consensus.powLimit = uint256S("0007ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powLimitStart = uint256S("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powLimitLegacy = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        
-        //based on https://github.com/BitcoinInterest1/BitcoinInterest/issues/78
+		consensus.CharityPubKey = "1c1b54c6d291e03b8370bb4cafd14d1498b009b9"; // 18jKhrn9XRWT2hQmLZnNPaaTAe1b2H2QE9
+        consensus.PreminedPubKey = "d789789cc3d545aa11b7c5886226e35e0b66cc99"; // 18jKhrn9XRWT2hQmLZnNPaaTAe1b2H2QE9
+        //based on https://github.com/BTCIPU/BTCIPU/issues/78
         consensus.nPowAveragingWindow = 30;
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.nPowMaxAdjustDown = 32;
@@ -278,11 +273,11 @@ public:
         pchMessageStartLegacy[2] = 0x09;
         pchMessageStartLegacy[3] = 0x07;
 
-        pchMessageStart[0] = 0xe1;
-        pchMessageStart[1] = 0x47;
-        pchMessageStart[2] = 0x6d;
-        pchMessageStart[3] = 0x44;
-        nDefaultPort = 18338;
+        pchMessageStart[0] = 0xdd;
+        pchMessageStart[1] = 0x74;
+        pchMessageStart[2] = 0xe7;
+        pchMessageStart[3] = 0x7b;
+        nDefaultPort = 18331;
         nBitcoinDefaultPort = 18333;
         nPruneAfterHeight = 1000;
         const size_t N = 200, K = 9;  // Same as mainchain.
@@ -299,10 +294,10 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
 
-        vSeeds.emplace_back("eu-test-dnsseed.bitcoininterest-official.org", true);
-        vSeeds.emplace_back("test-dnsseed.bitcoininterest.org", true);
-        vSeeds.emplace_back("test-dnsseed.BTCINT.org", true);
-        vSeeds.emplace_back("BCI.dnsseed.minertopia.org", true);
+        vSeeds.emplace_back("test-seeder1.bci-server.com", true);
+        vSeeds.emplace_back("test-seeder2.bci-server.com", true);
+        vSeeds.emplace_back("test-seeder3.bci-server.com", true);
+        vSeeds.emplace_back("test-seeder4.bci-server.com", true);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
@@ -344,7 +339,7 @@ public:
         consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 1351; // BIP65 activated on regtest (Used in rpc activation tests)
         consensus.BIP66Height = 1251; // BIP66 activated on regtest (Used in rpc activation tests)
-        consensus.BCIHeight = 3000;
+        consensus.BCIHeight = 300;
         consensus.BCIPremineWindow = 10;
         consensus.BCIPremineEnforceWhitelist = false;
         consensus.BitcoinPostforkBlock = uint256();
@@ -352,7 +347,9 @@ public:
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powLimitStart = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powLimitLegacy = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        //based on https://github.com/BitcoinInterest1/BitcoinInterest/issues/78
+		consensus.CharityPubKey = "54c9f6ee35967ccba9bd604ab2b1574266ce5b88"; // 18jKhrn9XRWT2hQmLZnNPaaTAe1b2H2QE9
+		consensus.PreminedPubKey = "54c9f6ee35967ccba9bd604ab2b1574266ce5b88"; // 18jKhrn9XRWT2hQmLZnNPaaTAe1b2H2QE9
+        //based on https://github.com/BTCIPU/BTCIPU/issues/78
         consensus.nPowAveragingWindow = 30;
         consensus.nPowMaxAdjustDown = 16;
         consensus.nPowMaxAdjustUp = 32;
@@ -476,43 +473,4 @@ void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime,
 }
 
 
-static CScript CltvMultiSigScript(const std::vector<std::string>& pubkeys, uint32_t lock_time) {
-    assert(pubkeys.size() == 6);
-    CScript redeem_script;
-    if (lock_time > 0) {
-        redeem_script << lock_time << OP_CHECKLOCKTIMEVERIFY << OP_DROP;
-    }
-    redeem_script << 4;
-    for (const std::string& pubkey : pubkeys) {
-        redeem_script << ToByteVector(ParseHex(pubkey));
-    }
-    redeem_script << 6 << OP_CHECKMULTISIG;
-    return redeem_script;
-}
 
-bool CChainParams::IsPremineAddressScript(const CScript& scriptPubKey, uint32_t height) const {
-    static const int LOCK_TIME = 3 * 365 * 24 * 3600;  // 3 years
-    static const int LOCK_STAGES = 3 * 12;  // Every month for 3 years
-    assert((uint32_t)consensus.BCIHeight <= height &&
-           height < (uint32_t)(consensus.BCIHeight + consensus.BCIPremineWindow));
-    if (!consensus.BCIPremineEnforceWhitelist) {
-        return true;
-    }
-    int block = height - consensus.BCIHeight;
-    int num_unlocked = consensus.BCIPremineWindow * 40 / 100;  // 40% unlocked.
-    int num_locked = consensus.BCIPremineWindow - num_unlocked;  // 60% time-locked.
-    int stage_lock_time = LOCK_TIME / LOCK_STAGES / consensus.nPowTargetSpacing;
-    int stage_block_height = num_locked / LOCK_STAGES;
-    const std::vector<std::string> pubkeys = vPreminePubkeys[block % vPreminePubkeys.size()];  // Round robin.
-    CScript redeem_script;
-    if (block < num_unlocked) {
-        redeem_script = CltvMultiSigScript(pubkeys, 0);
-    } else {
-        int locked_block = block - num_unlocked;
-        int stage = locked_block / stage_block_height;
-        int lock_time = consensus.BCIHeight + stage_lock_time * (1 + stage);
-        redeem_script = CltvMultiSigScript(pubkeys, lock_time);
-    }
-    CScript target_scriptPubkey = GetScriptForDestination(CScriptID(redeem_script));
-    return scriptPubKey == target_scriptPubkey;
-}

@@ -179,18 +179,33 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     nLastBlockWeight = nBlockWeight;
 
     // Create coinbase transaction.
+	// With Bitcoin Interest, at least 8% of all of the block subsidy should go to the charity address.
+    int64_t reward = GetBlockSubsidy(pindexPrev->nHeight+1, chainparams.GetConsensus());
+    int64_t charityAmount = reward * 8 / 100;
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
-    coinbaseTx.vout.resize(1);
-    coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+	const Consensus::Params& params = chainparams.GetConsensus();
+	if (nHeight <= (params.BCIHeight + params.BCIPremineWindow ))
+	{
+		coinbaseTx.vout.resize(1);
+		coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
+		coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+	}
+	else
+	{
+		coinbaseTx.vout.resize(2);
+		coinbaseTx.vout[0].scriptPubKey = CreateCharityScriptPubKey();
+		coinbaseTx.vout[1].scriptPubKey = scriptPubKeyIn;
+		coinbaseTx.vout[0].nValue = charityAmount;
+		coinbaseTx.vout[1].nValue = nFees + (GetBlockSubsidy(nHeight, chainparams.GetConsensus())- charityAmount);				
+	}
+
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
     pblocktemplate->vTxFees[0] = -nFees;
-
-    const Consensus::Params& params = chainparams.GetConsensus();
+ 
     int ser_flags = (nHeight < params.BCIHeight) ? SERIALIZE_BLOCK_LEGACY : 0;
     uint64_t nSerializeSize = GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION | ser_flags);
     LogPrintf("CreateNewBlock(): total size: %u block weight: %u txs: %u fees: %ld sigops %d\n",

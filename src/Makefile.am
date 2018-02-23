@@ -66,11 +66,11 @@ TESTS =
 BENCHMARKS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += binterest
+  bin_PROGRAMS += bcid
 endif
 
 if BUILD_BITCOIN_UTILS
-  bin_PROGRAMS += binterest-cli bitcoin-tx
+  bin_PROGRAMS += bci-cli bitcoin-tx
 endif
 
 .PHONY: FORCE check-symbols check-security
@@ -370,16 +370,16 @@ nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
 # bitcoind binary #
-binterest_SOURCES = bitcoind.cpp
-binterest_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-binterest_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-binterest_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+bcid_SOURCES = bitcoind.cpp
+bcid_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bcid_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bcid_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-binterest_SOURCES += bitcoind-res.rc
+bcid_SOURCES += bitcoind-res.rc
 endif
 
-binterest_LDADD = \
+bcid_LDADD = \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
   $(LIBUNIVALUE) \
@@ -393,19 +393,19 @@ binterest_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-binterest_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(LIBEQUIHASH_LIBS)
+bcid_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(LIBEQUIHASH_LIBS)
 
 # bitcoin-cli binary #
-binterest_cli_SOURCES = bitcoin-cli.cpp
-binterest_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-binterest_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-binterest_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+bci_cli_SOURCES = bitcoin-cli.cpp
+bci_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+bci_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bci_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-binterest_cli_SOURCES += bitcoin-cli-res.rc
+bci_cli_SOURCES += bitcoin-cli-res.rc
 endif
 
-binterest_cli_LDADD = \
+bci_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_CONSENSUS) \
@@ -414,7 +414,7 @@ binterest_cli_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-binterest_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS) $(LIBEQUIHASH_LIBS)
+bci_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS) $(LIBEQUIHASH_LIBS)
 #
 
 # bitcoin-tx binary #
