@@ -24,6 +24,11 @@ Bitcoin Interest will allow wallet holders to stake, or park, there coins in the
 ## Why Another Fork?
 We decided that Bitcoin was missing something and that something was a safe way to invest your coins and gain interest. There have been many products that promise interest, and have eventually run off with the money, or were not sustainable. With bitcoin interest, there is ZERO risk as the savings are decentralized, and so are your funds. You control how much you park, how you collect interest, and whenever you want to unpark your coins you are free to do so at any point. You also never have to worry about the payout pool not having funds as we have created a new, enhanced, Proof of Work that still pays miners their 12.5 payouts, but will also then add one coin to the interest pool to be paid out. 
 
+## Compiling
+
+You will find the compile docs in same location as bitcoin. Here is a link to compile instructions for Unix.
+https://github.com/BitcoinInterestOfficial/BitcoinInterest/blob/master/doc/build-unix.md
+
 ## Links
 
 * Website: http://bitcoininterest.io
