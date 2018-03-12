@@ -3,7 +3,7 @@ UNIX BUILD NOTES for BCI
 
 The following commands need to be ran for building BCI in Unix (Ubuntu) environments.
 
-
+```
 sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
 
 sudo apt-get install libboost-all-dev
@@ -26,9 +26,12 @@ wget http://de.archive.ubuntu.com/ubuntu/pool/universe/libs/libsodium/libsodium1
 
 dpkg -i libsodium*deb
 
+```
+
 Once these are done, please try compiling. Most errors are received from Libboost/Libsodium. There appears to be a bugged version in the bitcoin core deps folder. Please do not use this one. 
 
 Alternatively you can install them and compile them manually too if you'd like:
+```
 Step 1) Install Dependencies:
 sudo apt install libsodium18
 
@@ -45,7 +48,7 @@ Step 3) Run / test daemon
 In separate terminal:
 
 ./bci-cli getblockchaininfo
-
+```
 
 
 
