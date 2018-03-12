@@ -1,3 +1,57 @@
+UNIX BUILD NOTES for BCI
+====================
+
+The following commands need to be ran for building BCI in Unix (Ubuntu) environments.
+
+
+sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
+
+sudo apt-get install libboost-all-dev
+
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:bitcoin/bitcoin
+sudo apt-get update
+sudo apt-get install libdb4.8-dev libdb4.8++-dev
+
+sudo apt-get install libminiupnpc-dev
+
+sudo apt-get install libzmq3-dev
+
+sudo apt-get install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler
+
+sudo apt-get install libqrencode-dev
+
+wget http://de.archive.ubuntu.com/ubuntu/pool/universe/libs/libsodium/libsodium-dev_1.0.13-1_amd64.deb
+wget http://de.archive.ubuntu.com/ubuntu/pool/universe/libs/libsodium/libsodium18_1.0.13-1_amd64.deb
+
+dpkg -i libsodium*deb
+
+Once these are done, please try compiling. Most errors are received from Libboost/Libsodium. There appears to be a bugged version in the bitcoin core deps folder. Please do not use this one. 
+
+Alternatively you can install them and compile them manually too if you'd like:
+Step 1) Install Dependencies:
+sudo apt install libsodium18
+
+Manually compile / install libsodium-dev v1.0.13 or later from https://download.libsodium.org/libsodium/releases/ (Make sure no older versions are installed)
+
+./configure && make && make test && sudo make install
+
+./sudo ldconfig
+
+Step 2) Compile daemon and Qt
+cd BCI && ./autogen.sh && ./configure && make
+Step 3) Run / test daemon
+./bcid
+In separate terminal:
+
+./bci-cli getblockchaininfo
+
+
+
+
+Below are original Unix Build notes
+===============================================================================================
+
 UNIX BUILD NOTES
 ====================
 Some notes on how to build Bitcoin Core in Unix.
