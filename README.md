@@ -18,7 +18,7 @@ Bitcoin Interest will allow wallet holders to stake, or park, there coins in the
 * 1M (2-4M) Block sizes.
 * Difficulty recalculated every block.
 * Segwit.
-* Replay Protection.
+* Replay Protection (v2).
 * Unique Address formats.
 
 ## Why Another Fork?
