@@ -32,7 +32,10 @@ enum
 enum
 {
     FORKID_BCC = 0,
-    FORKID_BCI = 79, // Atomic number AU
+    FORKID_BCI = 79,
+    //FORKID_BCI = 29,
+    //FORKID_BTCGPU = 79,
+    //New Code for Updated Replay **BTC Still protected from replay** V2 release.
 };
 
 static const int FORKID_IN_USE = FORKID_BCI;
