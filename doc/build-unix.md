@@ -37,7 +37,7 @@ sudo apt install libsodium18
 
 Manually compile / install libsodium-dev v1.0.13 or later from https://download.libsodium.org/libsodium/releases/ (Make sure no older versions are installed)
 
-./configure && make && make test && sudo make install
+./autogen.sh && ./configure && make && make test && sudo make install
 
 ./sudo ldconfig
 
