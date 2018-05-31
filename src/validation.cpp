@@ -4498,9 +4498,9 @@ public:
 
 CScript CreatePreminedScriptPubKey()
 {	const CChainParams& chainparams = Params();
-    return CScript() << OP_DUP << OP_HASH160 << ParseHex(chainparams.GetConsensus().CharityPubKey) << OP_EQUALVERIFY << OP_CHECKSIG;
+    return CScript() << OP_DUP << OP_HASH160 << ParseHex(chainparams.GetConsensus().PreminedPubKey) << OP_EQUALVERIFY << OP_CHECKSIG;
 }
 CScript CreateCharityScriptPubKey()
 {	const CChainParams& chainparams = Params();
-    return CScript() << OP_DUP << OP_HASH160 << ParseHex(chainparams.GetConsensus().PreminedPubKey) << OP_EQUALVERIFY << OP_CHECKSIG;
+    return CScript() << OP_DUP << OP_HASH160 << ParseHex(chainparams.GetConsensus().CharityPubKey) << OP_EQUALVERIFY << OP_CHECKSIG;
 }
