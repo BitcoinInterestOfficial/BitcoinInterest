@@ -25,6 +25,12 @@ unsigned int BitcoinCalculateNextWorkRequired(const CBlockIndex* pindexLast, int
 /** Check whether the Equihash solution in a block header is valid */
 bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams&);
 
+/** Calculate the block header in ProgPow algorithm.*/
+uint256 getBlockHeaderProgPowHash(const CBlockHeader *pblock);
+
+/** Check whether the progPow in a block header is valid */
+bool CheckProgPow(const CBlockHeader *pblock, const CChainParams&);
+
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, bool postfork, const Consensus::Params&);
 

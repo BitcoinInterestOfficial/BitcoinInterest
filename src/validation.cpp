@@ -1020,11 +1020,22 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
         return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
     }
 
-    // Check Equihash solution
-    bool postfork = block.nHeight >= (uint32_t)consensusParams.BCIHeight;
-    if (postfork && !CheckEquihashSolution(&block, Params())) {
-        return error("ReadBlockFromDisk: Errors in block header at %s (bad Equihash solution)", pos.ToString());
+    // Check ProgPow/Equihash solution
+    bool postfork = false;
+    if (block.nHeight >= (uint32_t)consensusParams.ProgForkHeight) {
+        postfork = true;
+        if (!CheckProgPow(&block, Params())) {
+            return error("ReadBlockFromDisk: Errors in block header at %s (bad Progpow solution)", 
+                         pos.ToString());
+        }
+    } else if (block.nHeight >= (uint32_t)consensusParams.BTGHeight) {
+        postfork = true;
+        if (!CheckEquihashSolution(&block, Params())) {
+            return error("ReadBlockFromDisk: Errors in block header at %s (bad Equihash solution)",
+                          pos.ToString());
+        }
     }
+
     // Check the header
     if (!CheckProofOfWork(block.GetHash(), block.nBits, postfork, consensusParams))
         return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
@@ -2824,12 +2835,23 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, 
 
 static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    // Check Equihash solution is valid
     bool postfork = block.nHeight >= (uint32_t)consensusParams.BCIHeight;
-    if (fCheckPOW && postfork && !CheckEquihashSolution(&block, Params())) {
-        LogPrintf("CheckBlockHeader(): Equihash solution invalid at height %d\n", block.nHeight);
-        return state.DoS(100, error("CheckBlockHeader(): Equihash solution invalid"),
-                         REJECT_INVALID, "invalid-solution");
+    if (fCheckPOW && postfork) {
+        if ((block.nHeight < (uint32_t)consensusParams.ProgForkHeight)) {
+            // Check Equihash solution is valid
+            if (!CheckEquihashSolution(&block, Params())) {
+                LogPrintf("CheckBlockHeader(): Equihash solution invalid at height %d\n", block.nHeight);
+                return state.DoS(100, error("CheckBlockHeader(): Equihash solution invalid"),
+                                 REJECT_INVALID, "invalid-solution");
+            }
+        } else {
+            // Check ProgPow is valid 
+            if (!CheckProgPow(&block, Params())) {
+                LogPrintf("CheckBlockHeader(): ProgPow invalid at height %d\n", block.nHeight);
+                return state.DoS(100, error("CheckBlockHeader(): ProgPow invalid"),
+                                 REJECT_INVALID, "invalid-progpow");
+            }
+        }
     }
 
     // Check proof of work matches claimed amount

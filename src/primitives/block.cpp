@@ -12,9 +12,59 @@
 #include "consensus/params.h"
 #include "crypto/common.h"
 
+#include "crypto/progpow/ethash.h"
+#include "crypto/progpow/ethash.hpp"
+#include "crypto/progpow/keccak.h"
+#include "crypto/progpow/endianness.hpp"
+#include "streams.h"
+
+
+//get block header progpow hash based header, nonce and mix hash
+uint256 getBlockHeaderProgPowHash(const CBlockHeader *pblock)
+{
+    uint64_t nonce = (pblock->nNonce).GetUint64(3);
+
+    // I = the block header minus nonce and solution.
+    // also uses CEquihashInput as custom header
+    CEquihashInput I{*pblock};
+    // I||V  nonce part should be zeroed
+    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+    ss << I;
+    ss << pblock->nNonce;
+
+    //the nonce should be zeroed
+    memset((unsigned char*)&ss[108], 0, 32);
+    ethash::hash256 header_hash = ethash_keccak256((unsigned char*)&ss[0], 140);
+
+    ethash::hash256 mix;
+    //solution starts with  32 bytes mix hash.
+    const unsigned char *p = &*(pblock->nSolution.begin());
+    memcpy(mix.bytes, &p[0], 32);
+
+    //ethash::progpow
+    ethash::hash256 
+        ret = ethash::verify_final_progpow_hash(header_hash, mix, nonce);
+
+    uint256 r;
+    //memcpy(r.begin(), ret.bytes, 32);
+    //ethash hash is always consider as big endian. uint256 is little endian.
+    uint8_t *pp = r.begin();
+    for (int i = 0 ; i < 32; i++) {
+        pp[i] = ret.bytes[31-i];
+    }
+    return r;
+}
+
 uint256 CBlockHeader::GetHash(const Consensus::Params& params) const
 {
     int version;
+
+    //after progpow fork and has the solution.
+    if ((nHeight >= (uint32_t)params.ProgForkHeight) && 
+                            (this->nSolution.size() > 0)){
+        return getBlockHeaderProgPowHash(this);
+    }
+
     if (nHeight >= (uint32_t)params.BCIHeight) {
         version = PROTOCOL_VERSION;
     } else {

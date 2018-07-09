@@ -9,6 +9,10 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "crypto/equihash.h"
+#include "crypto/progpow/ethash.h"
+#include "crypto/progpow/ethash.hpp"
+#include "crypto/progpow/keccak.h"
+#include "crypto/progpow/endianness.hpp"
 #include "primitives/block.h"
 #include "streams.h"
 #include "uint256.h"
@@ -137,6 +141,70 @@ unsigned int BitcoinCalculateNextWorkRequired(const CBlockIndex* pindexLast, int
     return bnNew.GetCompact();
 }
 
+bool CheckProgPow (const CBlockHeader *pblock, const CChainParams& params)
+{
+    //progpow nonce is 8 bytes, located the (24-32) of 32 bytes nonce 
+    //little endian
+    uint64_t nonce = (pblock->nNonce).GetUint64(3);
+
+    uint32_t epoch = ethash::get_epoch_number(pblock->nHeight);
+    ethash_epoch_context epoch_ctx = ethash::get_global_epoch_context(epoch);
+    
+    // I = the block header minus nonce and solution.
+    // also uses CEquihashInput as custom header
+    CEquihashInput I{*pblock};
+    // I||V 
+    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+    ss << I;
+    ss << pblock->nNonce;
+
+    //nonce part should be zeroed
+    memset((unsigned char*)&ss[108], 0, 32); 
+    ethash::hash256 header_hash = ethash_keccak256((unsigned char*)&ss[0], 140);
+
+    ethash::hash256 mix;
+    //solution starts with 3bytes length and 32 bytes mix hash.
+    const unsigned char *p = &*(pblock->nSolution.begin());
+    memcpy(mix.bytes, &p[0], 32);
+
+    ethash::hash256 target;
+    arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
+    //memcpy(target.bytes, ArithToUint256(hashTarget).begin(), 32);
+    //endian conversion. ethash hash is considered as big endian.
+    uint8_t *hashTarget_p = ArithToUint256(hashTarget).begin(); 
+    for (int i = 0; i < 32; i ++ ) {
+        target.bytes[i] = hashTarget_p[31-i];
+    }
+
+    /////debug
+#if 0
+    uint256 mix_v, target_v, header_v;
+    memcpy(mix_v.begin(), mix.bytes, 32);
+    memcpy(target_v.begin(), target.bytes, 32);
+    memcpy(header_v.begin(), header_hash.bytes, 32);
+    error("progpow before verify. mix %s, target %s, header %s nonce %lx\n",
+          mix_v.GetHex().c_str(), target_v.GetHex().c_str(), header_v.GetHex().c_str(),
+          nonce);
+
+    //ethash::progpow
+    ethash::result ret = ethash::progpow(epoch_ctx, header_hash, nonce);
+    uint256 final_hash, mix_hash;
+
+    memcpy(final_hash.begin(), ret.final_hash.bytes, 32);
+    memcpy(mix_hash.begin(), ret.mix_hash.bytes, 32);
+    error("progpow hash results. final_hash %s, mix_hash %s\n",
+          final_hash.GetHex().c_str(), mix_hash.GetHex().c_str());
+#endif 
+
+    if (ethash::verify_progpow(epoch_ctx, header_hash,
+                               mix, nonce, target)) {
+        return true;
+    } else {
+        return error("CheckProgPow(): invalid nonce");
+    }
+ 
+}
+
 bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams& params)
 {
     unsigned int n = params.EquihashN();
@@ -173,12 +241,13 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, bool postfork, const Con
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
 
     // Check range
-    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.PowLimit(postfork)))
+    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.PowLimit(postfork))) 
         return false;
 
     // Check proof of work matches claimed amount
-    if (UintToArith256(hash) > bnTarget)
+    if (UintToArith256(hash) > bnTarget) {
         return false;
+    }
 
     return true;
 }

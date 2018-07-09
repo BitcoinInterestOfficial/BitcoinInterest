@@ -58,6 +58,12 @@ struct Params {
 	const char *CharityPubKey;
 	/**Premined Public Key**/
 	const char *PreminedPubKey;
+
+    /** ProgPow fork **/
+    int ProgForkHeight;
+    uint256 ProgPostforkBlock;
+    uint32_t ProgPostforkTime;
+
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargeting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.
@@ -70,6 +76,7 @@ struct Params {
     uint256 powLimit;
     uint256 powLimitLegacy;
     uint256 powLimitStart;
+    uint256 powLimitProgStart;
     
     const uint256& PowLimit(bool postfork) const { return postfork ? powLimit : powLimitLegacy; }
     bool fPowAllowMinDifficultyBlocks;

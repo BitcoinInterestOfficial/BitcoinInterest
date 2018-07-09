@@ -27,6 +27,10 @@
 #include "validationinterface.h"
 #include "warnings.h"
 
+#include "crypto/progpow/ethash.h"
+#include "crypto/progpow/ethash.hpp"
+#include "crypto/progpow/keccak.h"
+
 #include <memory>
 #include <stdint.h>
 
@@ -143,7 +147,7 @@ UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGen
                 pblock->nNonce = ArithToUint256(UintToArith256(pblock->nNonce) + 1);
                 --nMaxTries;
             }
-        } else {
+        } else if (pblock->nHeight < (uint32_t)params.GetConsensus().ProgForkHeight) {
             // Solve Equihash.
             crypto_generichash_blake2b_state eh_state;
             EhInitialiseState(n, k, eh_state);
@@ -184,7 +188,62 @@ UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGen
                     break;
                 }
             }
+        } else {
+            // search ProgPow after progpow fork
+
+            // I = the block header minus nonce and solution.
+            CEquihashInput I{*pblock};
+            CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+            ss << I;
+            ss << pblock->nNonce;
+
+            // H(I||V...
+            memset((unsigned char*)&ss[108], 0, 32);
+            ethash::hash256 header_hash = ethash_keccak256((unsigned char*)&ss[0], 140);
+
+            uint64_t start_nonce = pblock->nNonce.GetUint64(3);
+            uint32_t epoch = ethash::get_epoch_number(pblock->nHeight);
+            ethash_epoch_context epoch_ctx = ethash::get_global_epoch_context(epoch);
+
+            while (nMaxTries > 0) {
+                // Yes, there is a chance every nonce could fail to satisfy the -regtest
+                // target -- 1 in 2^(2^256). That ain't gonna happen
+                //pblock->nNonce = ArithToUint256(UintToArith256(pblock->nNonce) + 1);
+                
+                // H(I||V||...
+
+                ethash::hash256 target;
+                arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
+                //memcpy(target.bytes, ArithToUint256(hashTarget).begin(), 32);
+                uint8_t *pp = ArithToUint256(hashTarget).begin();
+                for(int i = 0; i < 32; i ++) {
+                    target.bytes[i] = pp[31-i];
+                }
+
+                auto r = ethash::check_progpow_nonce_light(epoch_ctx, header_hash,
+                                                           target, start_nonce);
+                if (r.ok) {
+                    //found, set nonce & mix hash
+                    pblock->nNonce = ArithToUint256(arith_uint256(start_nonce));
+
+                    std::vector<unsigned char> soln;
+                    soln.clear();
+                    unsigned char *p = &*(soln.begin());                    
+                    //soln length 1344
+                    p[0] = 0xfd;
+                    p[1] = 0x40;
+                    p[2] = 0x05;
+                    memcpy(&p[0], r.results.mix_hash.bytes, 32);
+
+                    pblock->nSolution = soln;
+                    break;
+                } 
+
+                --nMaxTries;
+                start_nonce ++;
+            }
         }
+
         if (nMaxTries == 0) {
             break;
         }
