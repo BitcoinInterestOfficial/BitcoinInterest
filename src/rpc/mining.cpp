@@ -766,15 +766,22 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
 	const CChainParams& params = Params();
-	if ((pindexPrev->nHeight+1) <= ((int32_t)params.GetConsensus().BCIHeight + (int32_t)params.GetConsensus().BCIPremineWindow ))
-	{
-		result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0]->vout[0].nValue));			
-	}
-	else
-	{
-		result.push_back(Pair("coinbasevalue",(int64_t)pblock->vtx[0]->vout[1].nValue)); //<--Bitcoin Interest: Specifications
-		result.push_back(Pair("charityvalue", (int64_t)pblock->vtx[0]->vout[0].nValue)); //<--Bitcoin Interest: Specifications					
-	}
+
+	if ((pindexPrev->nHeight+1) == 1) {
+		result.push_back(Pair("coinbasevalue",(int64_t)(pblock->vtx[0]->vout[0].nValue + pblock->vtx[0]->vout[1].nValue)));
+		result.push_back(Pair("charityvalue", (int64_t)0));	
+	} else if ((pindexPrev->nHeight+1) < (int32_t)params.GetConsensus().BCICoinTransferHeight) {
+		result.push_back(Pair("coinbasevalue",(int64_t)0));
+		result.push_back(Pair("charityvalue", (int64_t)0));			
+	} else {
+		if ((pindexPrev->nHeight+1) > (int32_t)params.GetConsensus().BCILastHeightWithReward) {
+			result.push_back(Pair("coinbasevalue",(int64_t)0));
+			result.push_back(Pair("charityvalue", (int64_t)0));	
+        } else {
+			result.push_back(Pair("coinbasevalue",(int64_t)pblock->vtx[0]->vout[1].nValue));
+			result.push_back(Pair("charityvalue", (int64_t)pblock->vtx[0]->vout[0].nValue));
+		}
+    }
 
     result.push_back(Pair("longpollid", chainActive.Tip()->GetBlockHash().GetHex() + i64tostr(nTransactionsUpdatedLast)));
     result.push_back(Pair("target", hashTarget.GetHex()));

@@ -19,8 +19,7 @@
 extern "C" {
 #endif
 
-//BTC is much slower than ethereum. 2800 epoch is about 3 weeks in btc2
-//#define ETHASH_EPOCH_LENGTH 30000
+//2800 epoch is about 3 weeks with 10 minute block interval
 #define ETHASH_EPOCH_LENGTH 2800
 
 #define ETHASH_LIGHT_CACHE_ITEM_SIZE 64

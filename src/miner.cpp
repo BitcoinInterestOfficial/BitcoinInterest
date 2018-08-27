@@ -181,7 +181,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // Create coinbase transaction.
 	// With Bitcoin Interest, at least 8% of all of the block subsidy should go to the charity address.
     int64_t reward = GetBlockSubsidy(pindexPrev->nHeight+1, chainparams.GetConsensus());
-    int64_t charityAmount = reward * 8 / 100;
+    int64_t charityAmount = reward * 24 / 100;
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();

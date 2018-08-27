@@ -41,6 +41,16 @@ uint256 getBlockHeaderProgPowHash(const CBlockHeader *pblock)
     const unsigned char *p = &*(pblock->nSolution.begin());
     memcpy(mix.bytes, &p[0], 32);
 
+    /*
+    //used to get block header hash for ProgPoW genesis block creation
+    uint256 header_v;
+    memcpy(header_v.begin(), header_hash.bytes, 32);
+    std::cout << "getBlockHeaderProgPowHash header= " << header_v.GetHex().c_str() << "\n";
+    memcpy(header_v.begin(), mix.bytes, 32);
+    std::cout << "getBlockHeaderProgPowHash mix= " << header_v.GetHex().c_str() << "\n";
+    std::cout << "getBlockHeaderProgPowHash nonce= " << nonce << "\n";
+    */
+    
     //ethash::progpow
     ethash::hash256 
         ret = ethash::verify_final_progpow_hash(header_hash, mix, nonce);

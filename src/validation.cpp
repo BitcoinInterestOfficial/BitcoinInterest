@@ -1028,7 +1028,7 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
             return error("ReadBlockFromDisk: Errors in block header at %s (bad Progpow solution)", 
                          pos.ToString());
         }
-    } else if (block.nHeight >= (uint32_t)consensusParams.BTGHeight) {
+    } else if (block.nHeight >= (uint32_t)consensusParams.BCIHeight) {
         postfork = true;
         if (!CheckEquihashSolution(&block, Params())) {
             return error("ReadBlockFromDisk: Errors in block header at %s (bad Equihash solution)",
@@ -1055,29 +1055,19 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
-    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
+    if (nHeight > consensusParams.BCILastHeightWithReward)
         return 0;
 
-    CAmount nSubsidy = 50 * COIN;
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
-    nSubsidy >>= halvings;
-	
-	if(nHeight >= consensusParams.BCIHeight)
-	{
-		CAmount nPostForkSubsidy = 54 * COIN;
-		if(nHeight <= (consensusParams.BCIHeight + consensusParams.BCIPremineWindow))
-		{
-			nSubsidy = 162.5* COIN;
-		}
-		else
-		{
-			nSubsidy = nPostForkSubsidy;
-			nSubsidy >>= halvings;
-		}
-	}
-			
+    CAmount nSubsidy = 13.5 * COIN;
+    
+    if (nHeight == 1) {
+        //subsidy of the first block: transfering coins from old blockchain
+        nSubsidy = (consensusParams.BCICoinTransferAmount/1e8) * COIN;
+    } else {
+        //no reward for coin transfer blocks
+        if ((nHeight > 1) && (nHeight <= consensusParams.BCICoinTransferHeight))
+            return 0;
+    }
     return nSubsidy;
 }
 
@@ -1875,12 +1865,19 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 	if (pindex->nHeight > ((int32_t)chainparams.GetConsensus().BCIHeight + (int32_t)chainparams.GetConsensus().BCIPremineWindow ))
 	{
 	    // For Bitcoin Interest also add the protocol rule that the first output in the coinbase must go to the charity address and have at least 8% of the subsidy (as per integer arithmetic)
-		if (block.vtx[0]->vout[0].scriptPubKey != CreateCharityScriptPubKey())
-			return state.DoS(100, error("ConnectBlock() : coinbase does not pay to the charity in the first output)"));
-		int64_t charityAmount = GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus()) * 8 / 100;
-		if (block.vtx[0]->vout[0].nValue < charityAmount)
-		   return state.DoS(100, error("ConnectBlock() : coinbase does not pay enough to the charity"));			
-	}		
+		int64_t charityAmount = GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus()) * 24 / 100;
+        
+		if (pindex->nHeight <= (int32_t)chainparams.GetConsensus().BCICoinTransferHeight)
+			charityAmount = 0;
+
+		if (charityAmount > 0) {
+			if (block.vtx[0]->vout[0].scriptPubKey != CreateCharityScriptPubKey())
+				return state.DoS(100, error("ConnectBlock() : coinbase does not pay to the charity in the first output)"));
+
+			if (block.vtx[0]->vout[0].nValue < charityAmount)
+				return state.DoS(100, error("ConnectBlock() : coinbase does not pay enough to the charity"));
+		}
+	}
 							   							   							   							   
     if (!control.Wait())
         return state.DoS(100, error("%s: CheckQueue failed", __func__), REJECT_INVALID, "block-validation-failed");

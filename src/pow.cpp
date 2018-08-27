@@ -149,6 +149,7 @@ bool CheckProgPow (const CBlockHeader *pblock, const CChainParams& params)
 
     uint32_t epoch = ethash::get_epoch_number(pblock->nHeight);
     ethash_epoch_context epoch_ctx = ethash::get_global_epoch_context(epoch);
+    epoch_ctx.block_number = pblock->nHeight;
     
     // I = the block header minus nonce and solution.
     // also uses CEquihashInput as custom header
@@ -163,7 +164,7 @@ bool CheckProgPow (const CBlockHeader *pblock, const CChainParams& params)
     ethash::hash256 header_hash = ethash_keccak256((unsigned char*)&ss[0], 140);
 
     ethash::hash256 mix;
-    //solution starts with 3bytes length and 32 bytes mix hash.
+    //nSolution is 32 bytes mix hash.
     const unsigned char *p = &*(pblock->nSolution.begin());
     memcpy(mix.bytes, &p[0], 32);
 
@@ -176,31 +177,32 @@ bool CheckProgPow (const CBlockHeader *pblock, const CChainParams& params)
         target.bytes[i] = hashTarget_p[31-i];
     }
 
-    /////debug
+    //debug:
 #if 0
-    uint256 mix_v, target_v, header_v;
-    memcpy(mix_v.begin(), mix.bytes, 32);
-    memcpy(target_v.begin(), target.bytes, 32);
+    //show header_hash and nonce
+    uint256 header_v, target_v, mixhash_v;
     memcpy(header_v.begin(), header_hash.bytes, 32);
-    error("progpow before verify. mix %s, target %s, header %s nonce %lx\n",
-          mix_v.GetHex().c_str(), target_v.GetHex().c_str(), header_v.GetHex().c_str(),
-          nonce);
-
-    //ethash::progpow
+    memcpy(target_v.begin(), target.bytes, 32);
+    memcpy(mixhash_v.begin(), mix.bytes, 32);
+    error("CheckProgPow: input values: height %d  epoch %d  header %s  nonce %lx  NONCE_UINT64_T %ld  target %s  mixhash %s\n", pblock->nHeight, epoch, header_v.GetHex().c_str(), nonce, nonce, target_v.GetHex().c_str(), mixhash_v.GetHex().c_str());
+    
+    /*
+    // ENABLE TO TEST PROGPOW
+    //run progpow
     ethash::result ret = ethash::progpow(epoch_ctx, header_hash, nonce);
     uint256 final_hash, mix_hash;
-
     memcpy(final_hash.begin(), ret.final_hash.bytes, 32);
     memcpy(mix_hash.begin(), ret.mix_hash.bytes, 32);
-    error("progpow hash results. final_hash %s, mix_hash %s\n",
+    error("CheckProgPow RUN PROGPOW: progpow hash results. final_hash %s, mix_hash %s\n",
           final_hash.GetHex().c_str(), mix_hash.GetHex().c_str());
-#endif 
+    */
+#endif
 
     if (ethash::verify_progpow(epoch_ctx, header_hash,
                                mix, nonce, target)) {
         return true;
     } else {
-        return error("CheckProgPow(): invalid nonce");
+        return error("CheckProgPow(): verify_progpow failed");
     }
  
 }

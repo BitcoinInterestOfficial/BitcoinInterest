@@ -48,6 +48,12 @@ struct Params {
     int BIP66Height;
     /** Block height at which Bitcoin GPU hard fork becomes active */
     int BCIHeight;
+    /** Block reward of height #1 to issue coins mined in old chain */
+    uint64_t BCICoinTransferAmount;
+    /** Block height of the last height with block reward */
+    int BCILastHeightWithReward;
+    /** Block height of the last block with 0 reward */
+    int BCICoinTransferHeight;
     /** Premining blocks for Bitcoin GPU hard fork **/
     int BCIPremineWindow;
     bool BCIPremineEnforceWhitelist;
