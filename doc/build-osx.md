@@ -30,8 +30,8 @@ Build Bitcoin Core
 1. Clone the Bitcoin Interest source code and cd into `bitcoin-interest`
 =======
 
-        git clone https://github.com/bitcoin-interest/bitcoin--interest
-        cd bitcoin-interest`
+        git clone https://github.com/BitcoinInterestOfficial/BitcoinInterest
+        cd BitcoinInterest
 
 2.  Build btcgpu:
 
@@ -41,7 +41,10 @@ Build Bitcoin Core
 
         ./autogen.sh
         ./configure
-        make
+
+    To do a 4 thread compilation:
+
+        make -j4
 
 3.  It is recommended to build and run the unit tests:
 
